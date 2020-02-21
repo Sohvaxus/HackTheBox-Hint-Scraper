@@ -32,15 +32,15 @@ This script is compatible with Python2 and Python3.
 
 ## Help
 ```
-Usage: python htbhints.py [URL]
-Example: python htbhints.py https://forum.hackthebox.eu/discussion/2427/traverxec
+Usage: python htbhintscraper.py [URL]
+Example: python htbhintscraper.py https://forum.hackthebox.eu/discussion/2427/traverxec
 PARAMETERS
   -h/--help: Print this help.
 ```
 
 ## Example output
 ```
-root@pwnux:~/Documents# python htbhints.py https://forum.hackthebox.eu/discussion/2630/nest
+root@pwnux:~/Documents# python htbhintscraper.py https://forum.hackthebox.eu/discussion/2630/nest
 USER HINTS
 ----------
 1. After finding the 1st user and the interesting files, finding the source is not that trivial, to me it was trial and error." />
