@@ -15,8 +15,23 @@ def getMaxPages(r):
     page = r.text
     maxPagePattern = re.compile('(?<=LastPage">)[^<:]+(?=:?<)')
     maxPage = re.findall(maxPagePattern, page)
-
-    return int(maxPage[0].strip())
+    
+    if maxPage:
+        return int(maxPage[0].strip())
+    else:
+        return None
+    
+def getBaseUrlComments(baseUrl, userPattern, rootPattern, userHints, rootHints):
+    # Get baseUrl comments
+    r = requests.get(baseUrl)
+    page = r.text
+    
+    # Find user hints on current page and add to hints array
+    if re.findall(userPattern, page):
+        userHints.append(re.findall(userPattern, page)[0])
+    # Find root hints on current page and add to hints array
+    if re.findall(rootPattern, page):
+        rootHints.append(re.findall(rootPattern, page)[0])
 
 def getHints(maxPage, baseUrl):
     dynamicUrl = ""
@@ -27,46 +42,56 @@ def getHints(maxPage, baseUrl):
     userPattern = re.compile('[U-u]ser\s?[*]?:[^<:]+(?=<)')
     rootPattern = re.compile('[R-r]oot\s?[*]?:[^<:]+(?=<)')
     
-    for i in range(2, maxPage + 1):
-        # Construct forum page URLs
-        # Check if / has been given at the end of the baseUrl
-        if baseUrl[-1:] == "/":
-            dynamicUrl = baseUrl + "p" + str(i)
-        else:
-            dynamicUrl = baseUrl + "/p" + str(i)
-        
-        # Request forum page source
-        r = requests.get(dynamicUrl)
-        page = r.text
-        
-        # Find user hints on current page and add to hints array
-        if re.findall(userPattern, page):
-            userHints.append(re.findall(userPattern, page)[0])
-        # Find root hints on current page and add to hints array
-        if re.findall(rootPattern, page):
-            rootHints.append(re.findall(rootPattern, page)[0])
+    if maxPage is not None:
+        getBaseUrlComments(baseUrl, userPattern, rootPattern, userHints, rootHints)
+        for i in range(2, maxPage + 1):
+            # Construct forum page URLs
+            # Check if / has been given at the end of the baseUrl
+            if baseUrl[-1:] == "/":
+                dynamicUrl = baseUrl + "p" + str(i)
+            else:
+                dynamicUrl = baseUrl + "/p" + str(i)
+            
+            # Request forum page source
+            r = requests.get(dynamicUrl)
+            page = r.text
+            
+            # Find user hints on current page and add to hints array
+            if re.findall(userPattern, page):
+                userHints.append(re.findall(userPattern, page)[0])
+            # Find root hints on current page and add to hints array
+            if re.findall(rootPattern, page):
+                rootHints.append(re.findall(rootPattern, page)[0])
+    else:
+        getBaseUrlComments(baseUrl, userPattern, rootPattern, userHints, rootHints)
         
     print("USER HINTS")
     print("----------")
-    for hint in userHints:
-        userHintCounter += 1
-        hint = re.split(r"user[ *]?:", hint, flags=re.IGNORECASE)
-        if hint:
-            if len(hint) > 1:
-                print(str(userHintCounter) + ". " + hint[1].strip())
-            else:
-                print(str(userHintCounter) + ". " + hint[0].strip())
+    if userHints:
+        for hint in userHints:
+            userHintCounter += 1
+            hint = re.split(r"user[ *]?:", hint, flags=re.IGNORECASE)
+            if hint:
+                if len(hint) > 1:
+                    print(str(userHintCounter) + ". " + hint[1].strip())
+                else:
+                    print(str(userHintCounter) + ". " + hint[0].strip())
+    else:
+        print("No user hints found.")
     
     print("\nROOT HINTS")
     print("----------")
-    for hint in rootHints:
-        rootHintCounter += 1
-        hint = re.split(r"root[ *]?:", hint, flags=re.IGNORECASE)
-        if hint:
-            if len(hint) > 1:
-                print(str(rootHintCounter) + ". " + hint[1].strip())
-            else:
-                print(str(rootHintCounter) + ". " + hint[0].strip())
+    if (rootHints):
+        for hint in rootHints:
+            rootHintCounter += 1
+            hint = re.split(r"root[ *]?:", hint, flags=re.IGNORECASE)
+            if hint:
+                if len(hint) > 1:
+                    print(str(rootHintCounter) + ". " + hint[1].strip())
+                else:
+                    print(str(rootHintCounter) + ". " + hint[0].strip())
+    else:
+        print("No root hints found.")
 
 if __name__ == "__main__":
     baseUrl = sys.argv[1]
