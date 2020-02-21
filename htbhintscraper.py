@@ -95,6 +95,7 @@ def getHints(maxPage, baseUrl):
 
 if __name__ == "__main__":
     baseUrl = sys.argv[1]
+    urlPattern = re.compile("(\/p[0-9]{0,})")
     
     if baseUrl == "-h" or baseUrl == "--help":
         getHelp()
@@ -102,12 +103,17 @@ if __name__ == "__main__":
         if "https://forum.hackthebox.eu/discussion/" not in baseUrl:
             print("[ERROR] Please provide a valid HTB forum URL.")
             getHelp()
-        else:
-            # Get page 1 source
-            r = requests.get(baseUrl)
-            
-            # Get current maximum pages
-            maxPage = getMaxPages(r)
-            
-            # Get all hints for the given box
-            getHints(maxPage, baseUrl)
+            sys.exit()
+        if re.search(urlPattern, baseUrl):
+            print("[ERROR] Please provide a valid HTB forum URL.")
+            getHelp()
+            sys.exit()
+
+        # Get page 1 source
+        r = requests.get(baseUrl)
+        
+        # Get current maximum pages
+        maxPage = getMaxPages(r)
+        
+        # Get all hints for the given box
+        getHints(maxPage, baseUrl)
